@@ -56,3 +56,13 @@ class EnvState:
         self.count = -1
         self.incount = -1
         self.outcount = -1
+
+
+class PacketType(Enum):
+    none = 0
+    e_start_info = 1
+    n_start_info = 2
+    n_send_info = 3
+    e_send_info = 4
+    n_restart_info = 5
+    e_restart_info = 6

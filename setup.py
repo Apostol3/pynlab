@@ -1,13 +1,12 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='pynlab',
-    version='0.1.1',
-    packages=[''],
-    url='',
+    version='0.2.0',
+    packages=find_packages(),
     install_requires=['pywin32>=219'],
     license='MIT',
     author='Kirill Dudkin',
     author_email='apostol3.mv@yandex.ru',
-    description=''
+    description='nlab for python'
 )

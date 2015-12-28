@@ -1,13 +1,13 @@
-__author__ = 'apostol3'
-
+import json
 import win32api
 import win32file
-import json
 
-import winerror
 import win32con
+import winerror
 
 from env import *
+
+__author__ = 'apostol3'
 
 PIPES_VER = 0x00000100
 
@@ -45,22 +45,9 @@ class NLab:
     def connect(self):
 
         try:
-            self.hPipe = win32file.CreateFile(self.pipe_name,  # pipe name
-                                              win32con.GENERIC_READ | win32con.GENERIC_WRITE,  # read and write access
-                                              0,  # no sharing
-                                              None,  # default security attributes
-                                              win32con.OPEN_EXISTING,  # opens existing pipe
-                                              0,  # default attributes
-                                              None)  # no template file
-
-            # dwMode = win32con.PIPE_READMODE_MESSAGE
-            # .SetNamedPipeHandleState(self.hPipe,  # pipe handle
-            # dwMode,  # new pipe mode
-            # 0,  # don't set maximum bytes
-            # 0)  # don't set maximum time"""
-
+            self.hPipe = win32file.CreateFile(self.pipe_name, win32con.GENERIC_READ | win32con.GENERIC_WRITE,
+                                              0, None, win32con.OPEN_EXISTING, 0, None)
         except win32api.error as e:
-            # Break if the pipe handle isn't valid.
             error_box(get_readable_string(e))
             return -1
         else:
@@ -72,9 +59,7 @@ class NLab:
 
     def _receive(self):
 
-        f_success, buf = win32file.ReadFile(self.hPipe,  # handle to pipe
-                                            self.inBufSize,  # size of buffer
-                                            None)  # not overlapped I/O
+        f_success, buf = win32file.ReadFile(self.hPipe, self.inBufSize, None)
 
         if (f_success != 0) or len(buf) == 0:
             if f_success == winerror.ERROR_MORE_DATA:
@@ -97,9 +82,7 @@ class NLab:
         if sz > self.outBufSize:
             error_box("Buffer overflow {} > {}".format(sz, self.outBufSize))
         # todo: check sending if needed
-        _, _ = win32file.WriteFile(self.hPipe,  # handle to pipe
-                                   buf,  # buffer to write from
-                                   None)  # not overlapped I/O
+        _, _ = win32file.WriteFile(self.hPipe, buf, None)
 
     def set_start_info(self, inf):
         if not isinstance(inf, EStartInfo):
@@ -139,8 +122,7 @@ class NLab:
         if nsi.head != VerificationHeader.ok:
             if nsi.head == VerificationHeader.restart:
                 self.lrinfo.count = self.state.count = dnsi["count"]
-            # return nsi
-            return doc
+            return nsi
 
         nsi.data = dnsi["data"]
         return nsi

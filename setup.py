@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='pynlab',
-    version='0.1.0',
+    version='0.1.1',
     packages=[''],
     url='',
     install_requires=['pywin32>=219'],

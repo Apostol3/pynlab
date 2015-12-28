@@ -1,6 +1,6 @@
-__author__ = 'apostol3'
-
 from enum import Enum
+
+__author__ = 'apostol3'
 
 
 class VerificationHeader(Enum):

@@ -1,6 +1,7 @@
 import json
+from urllib.parse import urlparse
 
-import pynlab.pipe_stream
+
 from pynlab.types import *
 
 __author__ = 'apostol3'
@@ -9,8 +10,18 @@ PIPES_VER = 0x00000100
 
 
 class Env:
-    def __init__(self, pipe_name="\\\\.\\pipe\\nlab"):
-        self.pipe = pynlab.pipe_stream.PipeStream(pipe_name, 307200, 307200)
+    def __init__(self, connection_uri='tcp://127.0.0.1:5005'):
+        self.uri = connection_uri
+        url_scheme = urlparse(connection_uri)
+        if url_scheme.scheme == 'tcp':
+            from pynlab.tcp_stream import TCPStream
+            self.stream = TCPStream(ip_address=url_scheme.hostname, tcp_port=url_scheme.port)
+        elif url_scheme.scheme == 'winpipe':
+            from pynlab.pipe_stream import PipeStream
+            self.stream = PipeStream('\\\\{}\\pipe{}'.format(url_scheme.hostname, url_scheme.path.replace('/', '\\')),
+                                     307200, 307200)
+        else:
+            raise RuntimeError('URI protocol must be tcp or winpipe')
         self.lasthead = VerificationHeader.fail
         self.state = EnvState()
         self.lrinfo = ERestartInfo()
@@ -36,13 +47,13 @@ class Env:
         return json.loads(s.decode().strip("\0 "))
 
     def create(self):
-        self.pipe.create()
+        self.stream.create()
 
     def wait(self):
-        self.pipe.wait()
+        self.stream.wait()
 
     def get_start_info(self):
-        doc = self.__unpack(self.pipe.receive())
+        doc = self.__unpack(self.stream.receive())
 
         if doc["type"] != PacketType.e_start_info.value:
             raise RuntimeError("Unknown packet type {}. Expected EStartInfo".format(doc["type"]))
@@ -68,10 +79,10 @@ class Env:
         buf = {"type": PacketType.n_start_info.value}
         ser = {"count": inf.count}
         buf["n_start_info"] = ser
-        self.pipe.send(self.__pack(buf))
+        self.stream.send(self.__pack(buf))
 
     def get(self):
-        doc = self.__unpack(self.pipe.receive())
+        doc = self.__unpack(self.stream.receive())
         if doc["type"] != PacketType.e_send_info.value:
             raise RuntimeError("Unknown packet type {}. Expected ESendInfo".format(doc["type"]))
         desi = doc["e_send_info"]
@@ -94,7 +105,7 @@ class Env:
 
         if inf.head == VerificationHeader.ok:
             buf["n_send_info"]["data"] = inf.data
-        self.pipe.send(self.__pack(buf))
+        self.stream.send(self.__pack(buf))
 
     def restart(self, inf):
         if not isinstance(inf, NRestartInfo):
@@ -102,13 +113,13 @@ class Env:
                 inf.__class__.__name__))
         buf = {"type": PacketType.n_send_info.value, "n_send_info": {"head": VerificationHeader.restart.value}}
         buf["n_send_info"]["count"] = inf.count
-        self.pipe.send(self.__pack(buf))
+        self.stream.send(self.__pack(buf))
 
     def stop(self):
         buf = {"type": PacketType.n_send_info.value}
         ser = {"head": VerificationHeader.stop.value}
         buf["n_send_info"] = ser
-        self.pipe.send(self.__pack(buf))
+        self.stream.send(self.__pack(buf))
 
     def terminate(self):
-        self.pipe.close()
+        self.stream.close()

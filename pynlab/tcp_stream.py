@@ -24,20 +24,11 @@ class TCPStream:
             socket_ = self.connection
         else:
             socket_ = self.socket_
-        buf_tmp = socket_.recv(self.buf_size)
+        buf = socket_.recv(self.buf_size)
 
-        sz = len(buf_tmp)
-        arr = [buf_tmp]
-        sz_all = sz
-        while buf_tmp.find(b'\0') == -1:
+        while buf[-1] != 0:
             buf_tmp = socket_.recv(self.buf_size)
-            sz = len(buf_tmp)
-            arr.append(buf_tmp)
-            sz_all += sz
-
-        buf = bytes()
-        for i in arr:
-            buf += i
+            buf += buf_tmp
 
         return buf
 
@@ -46,10 +37,6 @@ class TCPStream:
             socket_ = self.connection
         else:
             socket_ = self.socket_
-        while len(buf) > self.buf_size:
-            part = buf[:self.buf_size]
-            buf = buf[self.buf_size:]
-            socket_.send(part)
         socket_.send(buf)
 
     def connect(self):

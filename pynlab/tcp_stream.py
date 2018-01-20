@@ -44,6 +44,7 @@ class TCPStream:
         self._is_connected = True
 
     def create(self):
+        self.socket_.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket_.bind((self.tcp_address, self.tcp_port))
         self.socket_.listen()
         self._is_server = True

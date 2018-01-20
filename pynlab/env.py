@@ -75,9 +75,10 @@ class Env:
                 inf.__class__.__name__))
         # todo: check constraints
         self.state.count = inf.count
+        self.state.round_seed = inf.round_seed
 
         buf = {"type": PacketType.n_start_info.value}
-        ser = {"count": inf.count}
+        ser = {"count": inf.count, "round_seed": inf.round_seed}
         buf["n_start_info"] = ser
         self.stream.send(self.__pack(buf))
 
@@ -113,6 +114,11 @@ class Env:
                 inf.__class__.__name__))
         buf = {"type": PacketType.n_send_info.value, "n_send_info": {"head": VerificationHeader.restart.value}}
         buf["n_send_info"]["count"] = inf.count
+        buf["n_send_info"]["round_seed"] = inf.round_seed
+
+        self.state.count = inf.count
+        self.state.round_seed = inf.round_seed
+
         self.stream.send(self.__pack(buf))
 
     def stop(self):

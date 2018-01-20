@@ -26,6 +26,7 @@ class EStartInfo:
 class NStartInfo:
     def __init__(self):
         self.count = -1
+        self.round_seed = 0
 
 
 class NSendInfo:
@@ -43,6 +44,7 @@ class ESendInfo:
 class NRestartInfo:
     def __init__(self):
         self.count = -1
+        self.round_seed = 0
 
 
 class ERestartInfo:
@@ -56,6 +58,7 @@ class EnvState:
         self.count = -1
         self.incount = -1
         self.outcount = -1
+        self.round_seed = 0
 
 
 class PacketType(Enum):

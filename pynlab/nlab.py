@@ -70,8 +70,10 @@ class NLab:
         ser = doc["n_start_info"]
         nsi = NStartInfo()
         nsi.count = ser["count"]
+        nsi.round_seed = ser.get("round_seed", 0)
         # todo: check constraints
         self.state.count = nsi.count
+        self.state.round_seed = nsi.round_seed
         self.lrinfo = VerificationHeader.ok
         return nsi
 
@@ -86,6 +88,7 @@ class NLab:
         if nsi.head != VerificationHeader.ok:
             if nsi.head == VerificationHeader.restart:
                 self.lrinfo.count = self.state.count = dnsi["count"]
+                self.lrinfo.round_seed = self.state.round_seed = dnsi.get("round_seed", 0)
             return nsi
 
         nsi.data = dnsi["data"]

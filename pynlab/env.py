@@ -1,8 +1,6 @@
-import json
 from urllib.parse import urlparse
-
-
 from pynlab.types import *
+from pynlab.json import json
 
 __author__ = 'apostol3'
 
